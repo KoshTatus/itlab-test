@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .photo-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .photo {
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+        img {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detected Humans</h1>
+    <div class="photo-container" id="photo-container">
+    </div>
+
+    <script>
+        const eventSource = new EventSource("http://localhost:8000/events");
+
+        eventSource.onmessage = function(event) {
+            const imageUrl = event.data;
+            const parts = imageUrl.split(/[\\/]/);
+            const imagesIndex = parts.indexOf("images");
+            const relativePath = 'http://localhost:8000/' + parts.slice(imagesIndex).join("/");
+            console.log(relativePath);
+
+            const container = document.getElementById("photo-container");
+            const photoDiv = document.createElement("div");
+            photoDiv.className = "photo";
+
+            const img = document.createElement("img");
+            img.src = relativePath;
+
+            photoDiv.appendChild(img);
+            container.prepend(photoDiv);
+        };
+
+        eventSource.onerror = function() {
+            console.error("EventSource failed.");
+        };
+    </script>
+</body>
+</html>
